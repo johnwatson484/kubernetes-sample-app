@@ -73,6 +73,8 @@ steps:
   - script: |
       cd helm-repo
       helm index . --merge ./index.yaml
+      git config --global user.email "ado@microsoft.com"
+      git config --global user.name "Azure DevOps"
       git add .
       git commit -m "$(helmChartPath) updated by Azure DevOps"
       git push
