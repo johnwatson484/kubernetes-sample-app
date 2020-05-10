@@ -19,7 +19,6 @@ variables:
 
 steps: 
   - checkout: self
-  - checkout: helmRepo
 
   - task: PowerShell@2
     displayName: Set version
@@ -61,8 +60,9 @@ steps:
       helm package $(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
     displayName: Package Helm
 
-  - script: |
-      cd $(Agent.BuildDirectory)/helmRepo
+  - checkout: helmRepo
+  
+  - script: |      
       helm repo index . --merge ./index.yaml
       git config --global user.email "ado@microsoft.com"
       git config --global user.name "Azure DevOps"
