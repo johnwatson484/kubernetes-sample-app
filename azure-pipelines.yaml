@@ -35,18 +35,28 @@ steps:
       containerregistrytype: 'Container Registry'
       dockerRegistryEndpoint: 'DockerHub'
       dockerComposeFile: '**/docker-compose.yaml'
-      projectName: '$(repository)'
       action: 'Build services'
       additionalImageTags: '$(version)'
       includeLatestTag: true
   
-  - task: DockerCompose@0
+  # - task: DockerCompose@0
+  #   displayName: Push image
+  #   inputs:
+  #     containerregistrytype: 'Container Registry'
+  #     dockerRegistryEndpoint: 'DockerHub'
+  #     dockerComposeFile: '**/docker-compose.yaml'
+  #     projectName: '$(repository)'
+  #     action: 'Push services'
+  #     additionalImageTags: '$(version)'
+  #     includeLatestTag: true
+
+  - task: Docker@2
     displayName: Push image
     inputs:
-      containerregistrytype: 'Container Registry'
-      dockerRegistryEndpoint: 'DockerHub'
-      dockerComposeFile: '**/docker-compose.yaml'
-      projectName: '$(repository)'
-      action: 'Push services'
-      additionalImageTags: '$(version)'
-      includeLatestTag: true
+      containerRegistry: 'DockerHub'
+      repository: '$(repository)'
+      command: 'push'
+      tags: |
+        $(version)
+        latest
+      addPipelineData: false
