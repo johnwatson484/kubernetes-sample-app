@@ -1,7 +1,7 @@
 
 environment: production
-image: kubernetes-test-app
-name: johnwatson484/kubernetes-test-app
+image: johnwatson484/kubernetes-test-app
+name: kubernetes-test-app
 
 service:
   port: 80

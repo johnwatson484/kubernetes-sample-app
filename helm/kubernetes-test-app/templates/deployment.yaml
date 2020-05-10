@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ quote .Values.name }}
@@ -12,14 +12,13 @@ spec:
       app.kubernetes.io/name: {{ quote .Values.name }}
   template:
     metadata:
+      labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 6 }}
       annotations:
-        labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 6 }}
         redeployOnChange: {{ quote .Values.deployment.redeployOnChange }}
+    spec:
       securityContext:
         runAsUser: {{ .Values.deployment.runAsUser }}
         runAsNonRoot: {{ .Values.deployment.runAsNonRoot }}
-    spec:
-      priorityClassName: {{ quote .Values.deployment.priorityClassName }}
       restartPolicy: {{ quote .Values.deployment.restartPolicy }}
       containers:
       - name: {{ quote .Values.name }}
@@ -35,7 +34,7 @@ spec:
           value: {{ quote .Values.container.port }}
         ports:
         - name: http
-          containerPort: {{ quote .Values.container.port }}
+          containerPort: {{ .Values.container.port }}
           protocol: TCP
         resources:
           requests:
