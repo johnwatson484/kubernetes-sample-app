@@ -1,10 +1,12 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - master
+
+resources:
+  repositories:
+  - repository: helmRepo
+    type: github
+    endpoint: John D Watson
+    name: johnwatson484/helm-charts
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -13,9 +15,12 @@ variables:
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
-  helmRepository: 
+  helmRepository: https://github.com/johnwatson484/helm-charts.git
 
 steps: 
+  - checkout: self
+  - checkout: helmRepo
+
   - task: PowerShell@2
     displayName: Set version
     inputs:
@@ -53,17 +58,11 @@ steps:
       helmVersionToInstall: 'latest'
 
   - script: |
-      mkdir helm-repo
-      cd helm-repo
-      git clone https://github.com/johnwatson484/helm-charts.git
-    displayName: Clone Helm repo
-
-  - script: |
-      helm package $(helmChartPath) --version $(version) --destination helm-repo
+      helm package $(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
     displayName: Package Helm
 
   - script: |
-      cd helm-repo
+      cd $(Agent.BuildDirectory)/helmRepo
       helm repo index . --merge ./index.yaml
       git config --global user.email "ado@microsoft.com"
       git config --global user.name "Azure DevOps"
