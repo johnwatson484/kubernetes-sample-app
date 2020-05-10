@@ -11,7 +11,7 @@ pool:
 
 variables:
   version:
-  repository: johnwatson484/kubernetes-test-app
+  containerRepository: johnwatson484/kubernetes-test-app
 
 steps: 
   - task: PowerShell@2
@@ -22,6 +22,8 @@ steps:
         $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
 
+  
+
   # - task: Docker@2
   #   displayName: DockerHub login
   #   inputs:
@@ -29,32 +31,54 @@ steps:
   #     command: 'login'
   #     addPipelineData: false
 
-  - task: DockerCompose@0
-    displayName: Build image
-    inputs:
-      containerregistrytype: 'Container Registry'
-      dockerRegistryEndpoint: 'DockerHub'
-      dockerComposeFile: '**/docker-compose.yaml'
-      action: 'Build services'
-      additionalImageTags: '$(version)'
-      includeLatestTag: true
-  
   # - task: DockerCompose@0
-  #   displayName: Push image
   #   inputs:
   #     containerregistrytype: 'Container Registry'
   #     dockerRegistryEndpoint: 'DockerHub'
   #     dockerComposeFile: '**/docker-compose.yaml'
-  #     projectName: '$(repository)'
-  #     action: 'Push services'
+  #     buildImages: 
+  #     action: 'Build services'
   #     additionalImageTags: '$(version)'
   #     includeLatestTag: true
+  
+  # # - task: DockerCompose@0
+  # #   displayName: Push image
+  # #   inputs:
+  # #     containerregistrytype: 'Container Registry'
+  # #     dockerRegistryEndpoint: 'DockerHub'
+  # #     dockerComposeFile: '**/docker-compose.yaml'
+  # #     projectName: '$(repository)'
+  # #     action: 'Push services'
+  # #     additionalImageTags: '$(version)'
+  # #     includeLatestTag: true
+
+  # - task: Docker@2
+  #   inputs:
+  #     containerRegistry: 'DockerHub'
+  #     repository: '$(repository)'
+  #     command: 'push'
+  #     tags: |
+  #       $(version)
+  #       latest
+  #     addPipelineData: false
+
+  - task: Docker@2
+    displayName: Build image
+    inputs:
+      containerRegistry: 'DockerHub'
+      repository: '$(containerRepository)'
+      command: 'build'
+      Dockerfile: '**/Dockerfile'
+      tags: |
+        $(version)
+        latest
+      addPipelineData: false
 
   - task: Docker@2
     displayName: Push image
     inputs:
       containerRegistry: 'DockerHub'
-      repository: '$(repository)'
+      repository: '$(containerRepository)'
       command: 'push'
       tags: |
         $(version)
