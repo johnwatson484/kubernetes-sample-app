@@ -12,10 +12,13 @@ pool:
 variables:
   version:
 
-steps:
-  - script: |
-      VERSION=jq -r '.version' package.json
-      echo "##vso[task.setvariable variable=version]$VERSION"
+steps: 
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        $VERSION = (Get-Content 'package.json' | ConvertFrom-Json).version
+        echo '##vso[task.setvariable variable=version]'$VERSION
     displayName: Set version
 
   - script: |
