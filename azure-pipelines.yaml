@@ -12,7 +12,7 @@ pool:
 variables:
   version:
   containerRepository: johnwatson484/kubernetes-test-app
-  helmChartPath: ./helm/kubernetes-test-app
+  helmChartPath: helm/kubernetes-test-app
   helmRepository: 
 
 steps: 
@@ -58,13 +58,17 @@ steps:
       git clone https://github.com/johnwatson484/helm-charts.git
     displayName: Clone Helm repo
 
-  - task: HelmDeploy@0
+  - script: |
+      helm package $(helmChartPath) --version $(version) --destination helm-repo
     displayName: Package Helm
-    inputs:
-      command: 'package'
-      chartPath: '$(helmChartPath)'
-      destination: './helm-repo'
-      arguments: '--version $(version)'
+
+  # - task: HelmDeploy@0
+  #   displayName: Package Helm
+  #   inputs:
+  #     command: 'package'
+  #     chartPath: '$(helmChartPath)'
+  #     destination: './helm-repo'
+  #     arguments: '--version $(version)'
 
   - script: |
       cd helm-repo
