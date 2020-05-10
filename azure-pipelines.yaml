@@ -14,7 +14,7 @@ variables:
 
 steps:
   - script: |
-      VERSION=jq -r ''.version'' package.json
+      VERSION=jq -r '.version' package.json
       echo "##vso[task.setvariable variable=version]$VERSION"
     displayName: Set version
 
