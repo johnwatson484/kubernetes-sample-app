@@ -15,21 +15,22 @@ variables:
 
 steps: 
   - task: PowerShell@2
+    displayName: Set version
     inputs:
       targetType: 'inline'
       script: |
         $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
-    displayName: Set version
 
   - task: Docker@2
+    displayName: DockerHub login
     inputs:
       containerRegistry: 'DockerHub'
       command: 'login'
       addPipelineData: false
-    displayName: DockerHub login
 
   - task: DockerCompose@0
+    displayName: Build image
     inputs:
       containerregistrytype: 'Container Registry'
       dockerRegistryEndpoint: 'DockerHub'
@@ -37,13 +38,13 @@ steps:
       action: 'Build services'
       additionalImageTags: '$(version)'
       includeLatestTag: true
-    displayName: Build image
   
   - task: DockerCompose@0
+    displayName: Push image
     inputs:
       containerregistrytype: 'Container Registry'
+      dockerRegistryEndpoint: 'DockerHub'
       dockerComposeFile: '**/docker-compose.yaml'
       action: 'Push services'
       additionalImageTags: '$(version)'
       includeLatestTag: true
-    displayName: Push image
