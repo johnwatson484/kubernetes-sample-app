@@ -46,3 +46,4 @@ steps:
       action: 'Push services'
       additionalImageTags: '$(version)'
       includeLatestTag: true
+    displayName: Push image
