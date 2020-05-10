@@ -62,14 +62,6 @@ steps:
       helm package $(helmChartPath) --version $(version) --destination helm-repo
     displayName: Package Helm
 
-  # - task: HelmDeploy@0
-  #   displayName: Package Helm
-  #   inputs:
-  #     command: 'package'
-  #     chartPath: '$(helmChartPath)'
-  #     destination: './helm-repo'
-  #     arguments: '--version $(version)'
-
   - script: |
       cd helm-repo
       helm repo index . --merge ./index.yaml
@@ -77,5 +69,5 @@ steps:
       git config --global user.name "Azure DevOps"
       git add .
       git commit -m "$(helmChartPath) updated by Azure DevOps"
-      git push
+      git push origin master
     displayName: Update Helm repo
