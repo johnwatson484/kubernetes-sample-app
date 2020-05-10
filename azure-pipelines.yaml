@@ -21,47 +21,7 @@ steps:
       script: |
         $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
-
-  
-
-  # - task: Docker@2
-  #   displayName: DockerHub login
-  #   inputs:
-  #     containerRegistry: 'DockerHub'
-  #     command: 'login'
-  #     addPipelineData: false
-
-  # - task: DockerCompose@0
-  #   inputs:
-  #     containerregistrytype: 'Container Registry'
-  #     dockerRegistryEndpoint: 'DockerHub'
-  #     dockerComposeFile: '**/docker-compose.yaml'
-  #     buildImages: 
-  #     action: 'Build services'
-  #     additionalImageTags: '$(version)'
-  #     includeLatestTag: true
-  
-  # # - task: DockerCompose@0
-  # #   displayName: Push image
-  # #   inputs:
-  # #     containerregistrytype: 'Container Registry'
-  # #     dockerRegistryEndpoint: 'DockerHub'
-  # #     dockerComposeFile: '**/docker-compose.yaml'
-  # #     projectName: '$(repository)'
-  # #     action: 'Push services'
-  # #     additionalImageTags: '$(version)'
-  # #     includeLatestTag: true
-
-  # - task: Docker@2
-  #   inputs:
-  #     containerRegistry: 'DockerHub'
-  #     repository: '$(repository)'
-  #     command: 'push'
-  #     tags: |
-  #       $(version)
-  #       latest
-  #     addPipelineData: false
-
+        
   - task: Docker@2
     displayName: Build image
     inputs:
