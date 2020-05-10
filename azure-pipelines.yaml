@@ -18,7 +18,7 @@ steps:
       targetType: 'inline'
       script: |
         $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
-        echo '##vso[task.setvariable variable=version]$(packageVersion)'
+        echo '##vso[task.setvariable variable=version]$packageVersion'
     displayName: Set version
 
   - script: |
