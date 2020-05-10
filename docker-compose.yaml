@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  hapi-template:
+  kubernetes-test-app:
     build: .
-    image: hapi-template
-    container_name: hapi-template
+    image: kubernetes-test-app
+    container_name: kubernetes-test-app
