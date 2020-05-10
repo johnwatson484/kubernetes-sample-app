@@ -12,6 +12,8 @@ pool:
 variables:
   version:
   containerRepository: johnwatson484/kubernetes-test-app
+  helmChartPath: ./helm/kubernetes-test-app
+  helmRepository: 
 
 steps: 
   - task: PowerShell@2
@@ -21,26 +23,53 @@ steps:
       script: |
         $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
-        
-  - task: Docker@2
-    displayName: Build image
-    inputs:
-      containerRegistry: 'DockerHub'
-      repository: '$(containerRepository)'
-      command: 'build'
-      Dockerfile: '**/Dockerfile'
-      tags: |
-        $(version)
-        latest
-      addPipelineData: false
 
-  - task: Docker@2
-    displayName: Push image
+  # - task: Docker@2
+  #   displayName: Build image
+  #   inputs:
+  #     containerRegistry: 'DockerHub'
+  #     repository: '$(containerRepository)'
+  #     command: 'build'
+  #     Dockerfile: '**/Dockerfile'
+  #     tags: |
+  #       $(version)
+  #       latest
+  #     addPipelineData: false
+
+  # - task: Docker@2
+  #   displayName: Push image
+  #   inputs:
+  #     containerRegistry: 'DockerHub'
+  #     repository: '$(containerRepository)'
+  #     command: 'push'
+  #     tags: |
+  #       $(version)
+  #       latest
+  #     addPipelineData: false
+  
+  - task: HelmInstaller@1
+    displayName: Install Helm
     inputs:
-      containerRegistry: 'DockerHub'
-      repository: '$(containerRepository)'
-      command: 'push'
-      tags: |
-        $(version)
-        latest
-      addPipelineData: false
+      helmVersionToInstall: 'latest'
+
+  - script: |
+      mkdir helm-repo
+      cd helm-repo
+      git clone https://github.com/johnwatson484/helm-charts.git
+    displayName: Clone Helm repo
+
+  - task: HelmDeploy@0
+    displayName: Package Helm
+    inputs:
+      command: 'package'
+      chartPath: '$(helmChartPath)'
+      destination: './helm-repo'
+      arguments: '--version $(version)'
+
+  - script: |
+      cd helm-repo
+      helm index . --merge ./index.yaml
+      git add .
+      git commit -m "$(helmChartPath) updated by Azure DevOps"
+      git push
+    displayName: Update Helm repo
