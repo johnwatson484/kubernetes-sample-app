@@ -11,6 +11,7 @@ pool:
 
 variables:
   version:
+  repository: johnwatson484/kubernetes-test-app
 
 steps: 
   - task: PowerShell@2
@@ -21,6 +22,13 @@ steps:
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
     displayName: Set version
 
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'DockerHub'
+      command: 'login'
+      addPipelineData: false
+    displayName: DockerHub login
+
   - task: DockerCompose@0
     inputs:
       containerregistrytype: 'Container Registry'
@@ -30,3 +38,11 @@ steps:
       additionalImageTags: '$(version)'
       includeLatestTag: true
     displayName: Build image
+  
+  - task: DockerCompose@0
+    inputs:
+      containerregistrytype: 'Container Registry'
+      dockerComposeFile: '**/docker-compose.yaml'
+      action: 'Push services'
+      additionalImageTags: '$(version)'
+      includeLatestTag: true
