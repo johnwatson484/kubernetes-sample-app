@@ -1,0 +1,26 @@
+
+environment: production
+image: kubernetes-test-app
+name: johnwatson484/kubernetes-test-app
+
+service:
+  port: 80
+  type: ClusterIP
+
+container:
+  imagePullPolicy: Always
+  requestMemory: 60Mi
+  requestCpu: 60m
+  limitMemory: 80Mi
+  limitCpu: 80m  
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  port: 3000
+
+deployment:
+  runAsNonRoot: true
+  runAsUser: 1000
+  replicas: 1
+  minReadySeconds: 5
+  redeployOnChange: update this field to force a change
+  restartPolicy: Always

@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ quote .Values.name }}
+  labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 2 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  strategy: {}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ quote .Values.name }}
+  template:
+    metadata:
+      annotations:
+        labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 6 }}
+        redeployOnChange: {{ quote .Values.deployment.redeployOnChange }}
+      securityContext:
+        runAsUser: {{ .Values.deployment.runAsUser }}
+        runAsNonRoot: {{ .Values.deployment.runAsNonRoot }}
+    spec:
+      priorityClassName: {{ quote .Values.deployment.priorityClassName }}
+      restartPolicy: {{ quote .Values.deployment.restartPolicy }}
+      containers:
+      - name: {{ quote .Values.name }}
+        image: {{ quote .Values.image }}
+        imagePullPolicy: {{ quote .Values.container.imagePullPolicy }}
+        securityContext:
+          readOnlyRootFilesystem: {{ .Values.container.readOnlyRootFilesystem }}
+          allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+        env:
+        - name: NODE_ENV
+          value: {{ quote .Values.environment }}
+        - name: PORT
+          value: {{ quote .Values.container.port }}
+        ports:
+        - name: http
+          containerPort: {{ quote .Values.container.port }}
+          protocol: TCP
+        resources:
+          requests:
+            memory: {{ quote .Values.container.requestMemory }}
+            cpu: {{ quote .Values.container.requestCpu }}
+          limits:
+            memory: {{ quote .Values.container.limitMemory }}
+            cpu: {{ quote .Values.container.limitCpu }}

@@ -1,6 +1,8 @@
 version: '3.7'
 services:
   kubernetes-test-app:
-    build: .
+    build:
+      context: .
+      target: production
     image: kubernetes-test-app
     container_name: kubernetes-test-app
