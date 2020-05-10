@@ -21,5 +21,12 @@ steps:
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
     displayName: Set version
 
-  - script: |
-      echo $(version)
+  - task: DockerCompose@0
+    inputs:
+      containerregistrytype: 'Container Registry'
+      dockerRegistryEndpoint: 'DockerHub'
+      dockerComposeFile: '**/docker-compose.yaml'
+      action: 'Build services'
+      additionalImageTags: '$(version)'
+      includeLatestTag: true
+    displayName: Build image
