@@ -13,6 +13,7 @@ pool:
 
 variables:
   repo: kubernetes-test-app
+  helmRepo: helm-charts
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
@@ -60,15 +61,15 @@ steps:
   - checkout: helmRepo
 
   - script: |
-      helm package $(Agent.BuildDirectory)/s/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/s/helmRepo
+      helm package $(Agent.BuildDirectory)/s/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/s/$(helmRepo)
     displayName: Package Helm
   
   - script: |
-      cd $(Agent.BuildDirectory)/s/helmRepo
+      cd $(Agent.BuildDirectory)/s/$(helmRepo)
       helm repo index . --merge ./index.yaml
       git config --global user.email "ado@microsoft.com"
       git config --global user.name "Azure DevOps"
       git add .
-      git commit -m "$(helmChartPath) updated by Azure DevOps"
+      git commit -m "$(repo) updated by Azure DevOps"
       git push origin master
     displayName: Update Helm repo
