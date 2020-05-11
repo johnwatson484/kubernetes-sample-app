@@ -21,6 +21,7 @@ variables:
 
 steps: 
   - checkout: self
+    displayName: Clone repository
 
   - task: PowerShell@2
     displayName: Set version
@@ -59,17 +60,29 @@ steps:
       helmVersionToInstall: 'latest'
 
   - checkout: helmRepo
+    displayName: Clone Helm repository
 
   - script: |
       helm package $(Agent.BuildDirectory)/s/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/s/$(helmRepo)
     displayName: Package Helm
 
-  - task: InstallSSHKey@0
-    displayName: Install deploy key
+  - task: DownloadSecureFile@1
+    displayName: Download SSH key
     inputs:
-      knownHostsEntry: 'github.com'
-      sshPublicKey: 'PK'
-      sshKeySecureFile: 'GitHub-Helm-Deploy-Key'
+      secureFile: 'GitHub-Helm-Deploy-Key'
+
+  - script: |
+      mkdir ~/.ssh && mv $(mySecureFile.secureFilePath) ~/.ssh/id_rsa
+      chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    displayName: Install SSH key
+
+  # - task: InstallSSHKey@0
+  #   displayName: Install deploy key
+  #   inputs:
+  #     knownHostsEntry: 'github.com'
+  #     sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP91r73yh2gH2qhHyRMOcQSlPCPiBsqhu98m6D3vA/8Quet2cFHTVMitM3hxkiXVUpcorjSppV5FWhoTGo0ZflcukGo/spJGQpb4JbSVWN9u3uRSTB5yP8x/F4LVflewzteaxNq+XVI+bXXO0TtxtX2IFjSVXoeX58aZeSX6fGnnuPCEPolBKqnRsnAL/n3HtDQyy05uhppdcglQErABtDqZNUFint/u0zsRbcj3ImheVw4KL6QhuQjPpizhMkX7B1VtwYM0hoOzX3oKSeubQ8PjDCgJOj15+lAaOKl3GJn9gctbXL9tvIpyod6tggeSTbmRch3ljmbnLUWXmciBk/'
+  #     sshKeySecureFile: 'GitHub-Helm-Deploy-Key'
   
   - script: |
       cd $(Agent.BuildDirectory)/s/$(helmRepo)
