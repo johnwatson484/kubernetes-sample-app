@@ -14,10 +14,10 @@ pool:
 variables:
   repo: kubernetes-test-app
   helmRepo: helm-charts
+  helmRepositoryUrl: git@github.com:johnwatson484/helm-charts.git
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
-  helmRepositoryUrl: git@github.com:johnwatson484/helm-charts.git
 
 steps: 
   - checkout: self
@@ -68,7 +68,7 @@ steps:
     displayName: Install deploy key
     inputs:
       knownHostsEntry: 'github.com'
-      sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP91r73yh2gH2qhHyRMOcQSlPCPiBsqhu98m6D3vA/8Quet2cFHTVMitM3hxkiXVUpcorjSppV5FWhoTGo0ZflcukGo/spJGQpb4JbSVWN9u3uRSTB5yP8x/F4LVflewzteaxNq+XVI+bXXO0TtxtX2IFjSVXoeX58aZeSX6fGnnuPCEPolBKqnRsnAL/n3HtDQyy05uhppdcglQErABtDqZNUFint/u0zsRbcj3ImheVw4KL6QhuQjPpizhMkX7B1VtwYM0hoOzX3oKSeubQ8PjDCgJOj15+lAaOKl3GJn9gctbXL9tvIpyod6tggeSTbmRch3ljmbnLUWXmciBk/'
+      sshPublicKey: ''
       sshKeySecureFile: 'GitHub-Helm-Deploy-Key'
   
   - script: |
