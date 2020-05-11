@@ -68,7 +68,7 @@ steps:
     displayName: Install deploy key
     inputs:
       knownHostsEntry: 'github.com'
-      sshPublicKey: ''
+      sshPublicKey: 'PK'
       sshKeySecureFile: 'GitHub-Helm-Deploy-Key'
   
   - script: |
