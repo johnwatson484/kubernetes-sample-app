@@ -17,7 +17,7 @@ variables:
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
-  helmRepository: https://github.com/johnwatson484/helm-charts.git
+  helmRepository: git@github.com:johnwatson484/helm-charts.git
 
 steps: 
   - checkout: self
