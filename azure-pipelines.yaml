@@ -12,6 +12,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
+  repo: kubernetes-test-app
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
@@ -25,7 +26,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $packageVersion = (Get-Content '$(Agent.BuildDirectory)/self/package.json' | ConvertFrom-Json).version
+        $packageVersion = (Get-Content '$(Agent.BuildDirectory)/$(repo)/package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
 
   # - task: Docker@2
@@ -59,7 +60,7 @@ steps:
   - checkout: helmRepo
 
   - script: |
-      helm package $(Agent.BuildDirectory)/self/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
+      helm package $(Agent.BuildDirectory)/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
     displayName: Package Helm
   
   - script: |
