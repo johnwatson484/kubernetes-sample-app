@@ -17,7 +17,7 @@ variables:
   version:
   containerRepository: johnwatson484/kubernetes-test-app
   helmChartPath: helm/kubernetes-test-app
-  helmRepository: git@github.com:johnwatson484/helm-charts.git
+  helmRepositoryUrl: git@github.com:johnwatson484/helm-charts.git
 
 steps: 
   - checkout: self
@@ -63,16 +63,23 @@ steps:
   - script: |
       helm package $(Agent.BuildDirectory)/s/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/s/$(helmRepo)
     displayName: Package Helm
+
+  - task: InstallSSHKey@0
+    displayName: Install deploy key
+    inputs:
+      knownHostsEntry: 'github.com'
+      sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP91r73yh2gH2qhHyRMOcQSlPCPiBsqhu98m6D3vA/8Quet2cFHTVMitM3hxkiXVUpcorjSppV5FWhoTGo0ZflcukGo/spJGQpb4JbSVWN9u3uRSTB5yP8x/F4LVflewzteaxNq+XVI+bXXO0TtxtX2IFjSVXoeX58aZeSX6fGnnuPCEPolBKqnRsnAL/n3HtDQyy05uhppdcglQErABtDqZNUFint/u0zsRbcj3ImheVw4KL6QhuQjPpizhMkX7B1VtwYM0hoOzX3oKSeubQ8PjDCgJOj15+lAaOKl3GJn9gctbXL9tvIpyod6tggeSTbmRch3ljmbnLUWXmciBk/'
+      sshKeySecureFile: 'GitHub-Helm-Deploy-Key'
   
   - script: |
       cd $(Agent.BuildDirectory)/s/$(helmRepo)
       helm repo index . --merge ./index.yaml
-      git config --global user.email "ado@microsoft.com"
+      git config --global user.email "azuredevops@microsoft.com"
       git config --global user.name "Azure DevOps"
-      git checkout master
+      git remote set-url --push origin $(helmRepositoryUrl)
       git add .
       git commit -m "$(repo) updated by Azure DevOps"
-      git push origin master
+      git push origin HEAD:master
     displayName: Update Helm repo
 
   
