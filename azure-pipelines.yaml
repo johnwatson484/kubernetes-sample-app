@@ -67,12 +67,13 @@ steps:
     displayName: Package Helm
 
   - task: DownloadSecureFile@1
+    name: sshKey
     displayName: Download SSH key
     inputs:
       secureFile: 'GitHub-Helm-Deploy-Key'
 
   - script: |
-      mkdir ~/.ssh && mv $(GitHub-Helm-Deploy-Key.secureFilePath) ~/.ssh/id_rsa
+      mkdir ~/.ssh && mv $(sshKey.secureFilePath) ~/.ssh/id_rsa
       chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
       ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     displayName: Install SSH key
