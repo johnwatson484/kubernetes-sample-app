@@ -25,7 +25,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
+        $packageVersion = (Get-Content '$(Agent.BuildDirectory)/self/package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
 
   # - task: Docker@2
@@ -56,13 +56,14 @@ steps:
     inputs:
       helmVersionToInstall: 'latest'
 
-  - script: |
-      helm package $(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
-    displayName: Package Helm
-
   - checkout: helmRepo
+
+  - script: |
+      helm package $(Agent.BuildDirectory)/self/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/helmRepo
+    displayName: Package Helm
   
-  - script: |      
+  - script: |
+      cd $(Agent.BuildDirectory)/helmRepo
       helm repo index . --merge ./index.yaml
       git config --global user.email "ado@microsoft.com"
       git config --global user.name "Azure DevOps"
