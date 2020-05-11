@@ -69,7 +69,7 @@ steps:
       helm repo index . --merge ./index.yaml
       git config --global user.email "ado@microsoft.com"
       git config --global user.name "Azure DevOps"
-      git add -A
+      git add .
       git commit -m "$(repo) updated by Azure DevOps"
-      git push origin master
+      git push origin HEAD:master
     displayName: Update Helm repo
