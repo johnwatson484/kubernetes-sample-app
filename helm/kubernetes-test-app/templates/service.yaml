@@ -7,7 +7,7 @@ spec:
   ports:
   - name: http
     port: {{ .Values.service.port }}
-    targetPort: http
+    targetPort: {{ .Values.container.port }}
   selector:
     app.kubernetes.io/name: {{ quote .Values.name }}
   type: {{ quote .Values.service.type }}
