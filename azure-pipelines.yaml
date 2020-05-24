@@ -1,66 +1,35 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - master
+
+resources:
+  repositories:
+  - repository: helmRepo
+    type: github
+    endpoint: John D Watson
+    name: johnwatson484/helm-charts
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
+  repo: kubernetes-test-app
+  helmRepo: helm-charts
+  helmRepositoryUrl: git@github.com:johnwatson484/helm-charts.git
   version:
   containerRepository: johnwatson484/kubernetes-test-app
+  helmChartPath: helm/kubernetes-test-app
 
 steps: 
+  - checkout: self
+    displayName: Clone repository
+
   - task: PowerShell@2
     displayName: Set version
     inputs:
       targetType: 'inline'
       script: |
-        $packageVersion = (Get-Content 'package.json' | ConvertFrom-Json).version
+        $packageVersion = (Get-Content '$(Agent.BuildDirectory)/s/$(repo)/package.json' | ConvertFrom-Json).version
         Write-Host "##vso[task.setvariable variable=version;]$packageVersion"
-
-  
-
-  # - task: Docker@2
-  #   displayName: DockerHub login
-  #   inputs:
-  #     containerRegistry: 'DockerHub'
-  #     command: 'login'
-  #     addPipelineData: false
-
-  # - task: DockerCompose@0
-  #   inputs:
-  #     containerregistrytype: 'Container Registry'
-  #     dockerRegistryEndpoint: 'DockerHub'
-  #     dockerComposeFile: '**/docker-compose.yaml'
-  #     buildImages: 
-  #     action: 'Build services'
-  #     additionalImageTags: '$(version)'
-  #     includeLatestTag: true
-  
-  # # - task: DockerCompose@0
-  # #   displayName: Push image
-  # #   inputs:
-  # #     containerregistrytype: 'Container Registry'
-  # #     dockerRegistryEndpoint: 'DockerHub'
-  # #     dockerComposeFile: '**/docker-compose.yaml'
-  # #     projectName: '$(repository)'
-  # #     action: 'Push services'
-  # #     additionalImageTags: '$(version)'
-  # #     includeLatestTag: true
-
-  # - task: Docker@2
-  #   inputs:
-  #     containerRegistry: 'DockerHub'
-  #     repository: '$(repository)'
-  #     command: 'push'
-  #     tags: |
-  #       $(version)
-  #       latest
-  #     addPipelineData: false
 
   - task: Docker@2
     displayName: Build image
@@ -68,7 +37,7 @@ steps:
       containerRegistry: 'DockerHub'
       repository: '$(containerRepository)'
       command: 'build'
-      Dockerfile: '**/Dockerfile'
+      Dockerfile: '$(Agent.BuildDirectory)/s/$(repo)/Dockerfile'
       tags: |
         $(version)
         latest
@@ -84,3 +53,53 @@ steps:
         $(version)
         latest
       addPipelineData: false
+  
+  - task: HelmInstaller@1
+    displayName: Install Helm
+    inputs:
+      helmVersionToInstall: 'latest'
+
+  - checkout: helmRepo
+    displayName: Clone Helm repository
+
+  - script: |
+      helm package $(Agent.BuildDirectory)/s/$(repo)/$(helmChartPath) --version $(version) --destination $(Agent.BuildDirectory)/s/$(helmRepo)
+    displayName: Package Helm
+
+  - task: DownloadSecureFile@1
+    name: sshKey
+    displayName: Download SSH key
+    inputs:
+      secureFile: 'GitHub-Helm-Deploy-Key'
+
+  - script: |
+      mkdir ~/.ssh && mv $(sshKey.secureFilePath) ~/.ssh/id_rsa
+      chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_rsa
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    displayName: Install SSH key
+  
+  - script: |
+      cd $(Agent.BuildDirectory)/s/$(helmRepo)
+      helm repo index . --merge ./index.yaml
+      git config --global user.email "azuredevops@microsoft.com"
+      git config --global user.name "Azure DevOps"
+      git remote set-url --push origin $(helmRepositoryUrl)
+      git add .
+      git commit -m "$(repo) updated by Azure DevOps"
+      git push origin HEAD:master
+    displayName: Update Helm repo
+
+  - task: GitHubRelease@1
+    displayName: GitHub release
+    inputs:
+      gitHubConnection: 'John D Watson PAT'
+      repositoryName: '$(Build.Repository.Name)'
+      action: 'create'
+      target: '$(Build.SourceVersion)'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(version)'
+      title: '$(version)'
+      releaseNotesSource: 'inline'
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'commitBased'
+    continueOnError: true
