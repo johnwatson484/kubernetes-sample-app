@@ -5,7 +5,7 @@ metadata:
   labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 2 }}
 spec:
   replicas: {{ .Values.deployment.replicas }}
-  minReadySeconds: {{ .Values.minReadySeconds }}
+  minReadySeconds: {{ .Values.deployment.minReadySeconds }}
   strategy: {}
   selector:
     matchLabels:
