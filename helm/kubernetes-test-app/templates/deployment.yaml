@@ -14,6 +14,7 @@ spec:
     metadata:
       labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 6 }}
       annotations:
+        linkerd.io/inject: {{ quote .Values.deployment.linkerdInject }}
         redeployOnChange: {{ quote .Values.deployment.redeployOnChange }}
     spec:
       securityContext:
