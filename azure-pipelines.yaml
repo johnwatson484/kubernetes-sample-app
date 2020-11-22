@@ -1,6 +1,5 @@
 trigger:
   - master
-  - main
 
 pr: none
 
@@ -15,5 +14,3 @@ extends:
   template: build.yaml@templates
   parameters:
     repo: kubernetes-test-app
-    containerRepository: johnwatson484/kubernetes-test-app
-    helmChartPath: helm/kubernetes-test-app
