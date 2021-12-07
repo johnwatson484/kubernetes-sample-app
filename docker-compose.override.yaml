@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 services:
   kubernetes-test-app:
     build:
@@ -8,5 +8,5 @@ services:
       - "3000:3000"
       - "9229:9229"
     volumes:
-      - ./app/:/home/node/app/
+      - ./app:/home/node/app
       - ./package.json:/home/node/package.json
