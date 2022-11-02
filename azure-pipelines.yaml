@@ -13,4 +13,7 @@ resources:
 extends:
   template: build.yaml@templates
   parameters:
-    repo: kubernetes-test-app
+    name: kubernetes-test-app
+    deploy: true
+    namespace: kubernetes-test-app
+    
