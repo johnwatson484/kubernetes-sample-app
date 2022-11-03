@@ -2,17 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ quote .Values.name }}
-  labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 2 }}
+  labels: 
+    {{- include "kubernetes-test-app.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicas }}
   minReadySeconds: {{ .Values.deployment.minReadySeconds }}
   strategy: {}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ quote .Values.name }}
+      {{- include "kubernetes-test-app.selector-labels" . | nindent 6 }}
   template:
     metadata:
-      labels: {{ include "kubernetes-test-app.labels" . | trimSuffix "\n" | indent 6 }}
+      labels: 
+      {{- include "kubernetes-test-app.labels" . | nindent 8 }}
       annotations:
         linkerd.io/inject: {{ quote .Values.deployment.linkerdInject }}
         redeployOnChange: {{ quote .Values.deployment.redeployOnChange }}
